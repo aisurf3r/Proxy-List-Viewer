@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="View, filter, sort, and export a list of proxies obtained from the GeoNode API">
+<title>ProxyList Viewer</title>
+<style>
+body {
+font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+margin: 0;
+padding: 0;
+background: #121212;
+color: #e0e0e0;
+display: flex;
+flex-direction: column;
+align-items: center;
+min-height: 100vh;
+}
+h1 {
+text-align: center;
+color: #bb86fc;
+margin-top: 20px;
+}
+.filters-container {
+width: 95%;
+max-width: 1200px;
+margin: 20px auto;
+display: grid;
+grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+gap: 15px;
+}
+.filters-container input, .filters-container select {
+width: 100%;
+padding: 10px;
+border: 1px solid #333;
+border-radius: 5px;
+font-size: 14px;
+background-color: #1e1e1e;
+color: #e0e0e0;
+transition: all 0.3s ease;
+}
+.filters-container input:focus, .filters-container select:focus {
+border-color: #bb86fc;
+box-shadow: 0 0 5px rgba(187, 134, 252, 0.5);
+}
+.filters-container label {
+color: #bb86fc;
+font-weight: bold;
+}
+.switch-container {
+display: flex;
+align-items: center;
+gap: 10px;
+}
+.switch {
+position: relative;
+display: inline-block;
+width: 50px;
+height: 24px;
+}
+.switch input {
+opacity: 0;
+width: 0;
+height: 0;
+}
+.slider {
+position: absolute;
+cursor: pointer;
+top: 0;
+left: 0;
+right: 0;
+bottom: 0;
+background-color: #333;
+transition: 0.4s;
+border-radius: 24px;
+}
+.slider:before {
+position: absolute;
+content: "";
+height: 18px;
+width: 18px;
+left: 3px;
+bottom: 3px;
+background-color: white;
+transition: 0.4s;
+border-radius: 50%;
+}
+input:checked + .slider {
+background-color: #bb86fc;
+}
+input:checked + .slider:before {
+transform: translateX(26px);
+}
+table {
+width: 95%;
+max-width: 1200px;
+border-collapse: collapse;
+margin: 20px auto;
+background: #1e1e1e;
+border-radius: 10px;
+overflow: hidden;
+box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+}
+table th, table td {
+border: 1px solid #333;
+padding: 12px;
+text-align: left;
+}
+table th {
+background: #bb86fc;
+color: #121212;
+font-weight: bold;
+}
+table tr:hover {
+background-color: #2c2c2c;
+transition: background-color 0.3s ease;
+}
+.latency-low {
+color: #4caf50;
+}
+.latency-medium {
+color: #ff9800;
+}
+.latency-high {
+color: #f44336;
+}
+.export-buttons {
+text-align: center;
+margin-bottom: 20px;
+display: flex;
+align-items: center;
+justify-content: center;
+gap: 10px;
+}
+button {
+padding: 10px 20px;
+margin: 5px;
+border: none;
+border-radius: 5px;
+cursor: pointer;
+background-color: #bb86fc;
+color: #121212;
+font-size: 16px;
+transition: all 0.3s ease;
+}
+button:hover {
+background-color: #3700b3;
+transform: scale(1.05);
+}
+select#exportFormatSelector {
+padding: 10px 20px;
+margin: 5px;
+border: none;
+border-radius: 5px;
+cursor: pointer;
+background-color: #bb86fc;
+color: #121212;
+font-size: 16px;
+transition: all 0.3s ease;
+}
+select#exportFormatSelector:hover {
+background-color: #3700b3;
+transform: scale(1.05);
+}
+.pagination {
+margin-top: 20px;
+display: flex;
+gap: 10px;
+}
+footer {
+margin-top: auto;
+padding: 20px;
+background: #1e1e1e;
+color: #e0e0e0;
+width: 100%;
+text-align: center;
+font-size: 14px;
+}
+footer a {
+color: #bb86fc;
+text-decoration: none;
+display: flex;
+align-items: center;
+justify-content: center;
+gap: 5px;
+}
+footer a img {
+width: 20px;
+height: 20px;
+}
+@media (max-width: 768px) {
+.filters-container {
+grid-template-columns: 1fr;
+}
+}
+</style>
+</head>
+<body>
+<h1>ProxyList Viewer</h1>
+<div class="filters-container">
+<select id="protocolFilter" onchange="applyFiltersAndSorting()">
+<option value="">All Protocols</option>
+<option value="http">HTTP</option>
+<option value="https">HTTPS</option>
+<option value="socks4">SOCKS4</option>
+<option value="socks5">SOCKS5</option>
+</select>
+<select id="anonymityFilter" onchange="applyFiltersAndSorting()">
+<option value="">All Anonymity Levels</option>
+<option value="elite">Elite</option>
+<option value="anonymous">Anonymous</option>
+<option value="transparent">Transparent</option>
+</select>
+<select id="httpsFilter" onchange="applyFiltersAndSorting()">
+<option value="">Filter HTTPS</option>
+<option value="Yes">Yes</option>
+<option value="No">No</option>
+</select>
+<div class="switch-container">
+<label for="latencySwitch">Latency Order:</label>
+<label class="switch">
+<input type="checkbox" id="latencySwitch" onchange="applyFiltersAndSorting()">
+<span class="slider"></span>
+</label>
+</div>
+<div class="switch-container">
+<label for="uptimeSwitch">Uptime Order:</label>
+<label class="switch">
+<input type="checkbox" id="uptimeSwitch" onchange="applyFiltersAndSorting()">
+<span class="slider"></span>
+</label>
+</div>
+<input type="text" id="portFilter" placeholder="Search Port..." oninput="applyFiltersAndSorting()">
+<input type="text" id="countryFilter" placeholder="Search Country..." oninput="applyFiltersAndSorting()">
+<button onclick="resetFilters()">Filters Reset</button>
+</div>
+<div class="export-buttons">
+<select id="exportFormatSelector">
+<option value="full">Protocol:IP:Port</option>
+<option value="simple">IP:Port</option>
+</select>
+<button onclick="exportData('json')">Export JSON</button>
+<button onclick="exportData('txt')">Export TXT</button>
+<button onclick="exportData('csv')">Export CSV</button>
+</div>
+<table id="proxyTable">
+<thead>
+<tr>
+<th>Protocol</th>
+<th>IP Address</th>
+<th>Port</th>
+<th>Anonymity</th>
+<th>Https</th>
+<th>Latency (ms)</th>
+<th>Uptime (%)</th>
+<th>Country</th>
+</tr>
+</thead>
+<tbody>
+<!-- Proxy data will load here -->
+</tbody>
+</table>
+<div class="pagination">
+<button id="prevPage" onclick="changePage(-1)" disabled>< Back</button>
+<span id="currentPage">Page 1</span>
+<button id="nextPage" onclick="changePage(1)">Next ></button>
+</div>
+<footer>
+&copy; 2025 Aisurf3r. All rights reserved.
+<a href="https://github.com/aisurf3r" target="_blank">
+<img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/github/github-original.svg" alt="GitHub Logo">
+GitHub
+</a>
+</footer>
+<script>
+let currentPage = 1;
+const limit = 50;
+let totalProxies = [];
+let cachedProxies = JSON.parse(localStorage.getItem("cachedProxies")) || {};
+
+document.addEventListener("DOMContentLoaded", () => {
+fetchProxies();
+});
+
+async function fetchProxies() {
+try {
+if (cachedProxies[currentPage]) {
+totalProxies = cachedProxies[currentPage];
+applyFiltersAndSorting();
+updatePaginationButtons();
+return;
+}
+
+const response = await fetch(
+`https://proxylist.geonode.com/api/proxy-list?limit=${limit}&page=${currentPage}&sort_by=lastChecked&sort_type=desc`
+);
+
+if (!response.ok) throw new Error("Error fetching proxies.");
+
+const { data } = await response.json();
+
+const proxies = data.map((proxy) => ({
+protocol: proxy.protocols.join(", "),
+ip: proxy.ip,
+port: proxy.port,
+anonymity: proxy.anonymityLevel || "-",
+https: proxy.isHttps ? "Yes" : "No",
+latency: parseInt(proxy.responseTime) || 0,
+uptime: parseFloat(proxy.upTime).toFixed(2) || "0.00",
+country: proxy.country || "-",
+}));
+
+totalProxies = proxies;
+
+cachedProxies[currentPage] = proxies;
+localStorage.setItem("cachedProxies", JSON.stringify(cachedProxies));
+
+applyFiltersAndSorting();
+updatePaginationButtons();
+} catch (error) {
+console.error(error);
+alert("Error loading proxies. Please try again later.");
+}
+}
+
+function populateTable(proxies) {
+const tbody = document.querySelector("#proxyTable tbody");
+tbody.innerHTML = "";
+
+proxies.forEach((proxy) => {
+const row = document.createElement("tr");
+
+let latencyClass = "";
+if (proxy.latency <= 200) {
+latencyClass = "latency-low";
+} else if (proxy.latency > 200 && proxy.latency <= 600) {
+latencyClass = "latency-medium";
+} else {
+latencyClass = "latency-high";
+}
+
+row.innerHTML = `
+<td>${proxy.protocol}</td>
+<td>${proxy.ip}</td>
+<td>${proxy.port}</td>
+<td>${proxy.anonymity}</td>
+<td>${proxy.https}</td>
+<td class="${latencyClass}">${proxy.latency} ms</td>
+<td>${proxy.uptime}%</td>
+<td>${proxy.country}</td>
+`;
+
+tbody.appendChild(row);
+});
+}
+
+function applyFiltersAndSorting() {
+const protocolFilter = document.getElementById("protocolFilter").value.toLowerCase();
+const anonymityFilter = document.getElementById("anonymityFilter").value;
+const httpsFilter = document.getElementById("httpsFilter").value;
+const portFilter = document.getElementById("portFilter").value.trim();
+const countryFilter = document.getElementById("countryFilter").value.toLowerCase();
+
+// Apply filters
+const filteredData = totalProxies.filter((proxy) => {
+return (
+(protocolFilter === "" || proxy.protocol.toLowerCase().includes(protocolFilter)) &&
+(anonymityFilter === "" || proxy.anonymity.toLowerCase() === anonymityFilter) &&
+(httpsFilter === "" || proxy.https === httpsFilter) &&
+(portFilter === "" || proxy.port.toString().includes(portFilter)) &&
+(countryFilter === "" || proxy.country.toLowerCase().includes(countryFilter))
+);
+});
+
+// Apply sorting
+applySorting(filteredData);
+}
+
+function applySorting(filteredData) {
+const latencySwitch = document.getElementById("latencySwitch").checked;
+const uptimeSwitch = document.getElementById("uptimeSwitch").checked;
+
+let sortedData = [...filteredData];
+
+if (latencySwitch && uptimeSwitch) {
+sortedData.sort((a, b) => {
+if (a.latency === b.latency) {
+return parseFloat(b.uptime) - parseFloat(a.uptime);
+}
+return a.latency - b.latency;
+});
+} else if (latencySwitch) {
+sortedData.sort((a, b) => a.latency - b.latency);
+} else if (uptimeSwitch) {
+sortedData.sort((a, b) => parseFloat(b.uptime) - parseFloat(a.uptime));
+}
+
+populateTable(sortedData);
+}
+
+function resetFilters() {
+document.getElementById("protocolFilter").value = "";
+document.getElementById("anonymityFilter").value = "";
+document.getElementById("httpsFilter").value = "";
+document.getElementById("portFilter").value = "";
+document.getElementById("countryFilter").value = "";
+document.getElementById("latencySwitch").checked = false;
+document.getElementById("uptimeSwitch").checked = false;
+
+applyFiltersAndSorting();
+}
+
+function changePage(direction) {
+currentPage += direction;
+if (currentPage < 1) {
+currentPage = 1;
+}
+fetchProxies();
+}
+
+function updatePaginationButtons() {
+const prevButton = document.getElementById("prevPage");
+const nextButton = document.getElementById("nextPage");
+const currentPageElement = document.getElementById("currentPage");
+currentPageElement.textContent = `Page ${currentPage}`;
+prevButton.disabled = currentPage === 1;
+}
+
+function exportData(format) {
+const data = totalProxies;
+if (!data || data.length === 0) {
+alert("No data to export.");
+return;
+}
+
+const exportFormat = document.getElementById("exportFormatSelector").value;
+
+if (format === "json") {
+try {
+JSON.stringify(data);
+const jsonData = JSON.stringify(data, null, 2);
+downloadFile(jsonData, "proxies.json", "application/json");
+} catch (error) {
+alert("Invalid JSON data.");
+}
+} else if (format === "txt") {
+let txtData = "";
+if (exportFormat === "full") {
+txtData = data
+.map((proxy) => `${proxy.protocol}://${proxy.ip}:${proxy.port}`)
+.join("\n");
+} else {
+txtData = data
+.map((proxy) => `${proxy.ip}:${proxy.port}`)
+.join("\n");
+}
+downloadFile(txtData, "proxies.txt", "text/plain");
+} else if (format === "csv") {
+try {
+const csvHeaders = Object.keys(data[0]).join(",");
+const csvRows = data.map((proxy) =>
+Object.values(proxy).map((val) => `"${val}"`).join(",")
+);
+const csvData = [csvHeaders, ...csvRows].join("\n");
+downloadFile(csvData, "proxies.csv", "text/csv");
+} catch (error) {
+alert("Invalid CSV data.");
+}
+}
+}
+
+function downloadFile(content, fileName, mimeType) {
+const blob = new Blob([content], { type: mimeType });
+const url = URL.createObjectURL(blob);
+const a = document.createElement("a");
+a.href = url;
+a.download = fileName;
+a.click();
+URL.revokeObjectURL(url);
+}
+</script>
+</body>
+</html>
