@@ -34,6 +34,9 @@ HTML5 & CSS3: Structure and styling of the interface.
 JavaScript (ES6+): Logic for filtering, sorting, and exporting data.
 GeoNode API: Source of proxy data.
 
+TODO. + add more proxy endpoints and a selector to choose from.
+      + workarround the filters logic
+
 Contributions
 Contributions are welcome! If you find any bugs or have ideas to improve this tool, feel free to open an issue or submit a pull request.
 
