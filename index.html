@@ -167,6 +167,7 @@ transform: scale(1.05);
 margin-top: 20px;
 display: flex;
 gap: 10px;
+align-items: center;
 }
 footer {
 margin-top: auto;
@@ -233,6 +234,12 @@ grid-template-columns: 1fr;
 </div>
 <input type="text" id="portFilter" placeholder="Search Port..." oninput="applyFiltersAndSorting()">
 <input type="text" id="countryFilter" placeholder="Search Country..." oninput="applyFiltersAndSorting()">
+<select id="itemsPerPage" onchange="changeItemsPerPage()">
+<option value="10">10 per page</option>
+<option value="20">20 per page</option>
+<option value="50" selected>50 per page</option>
+<option value="100">100 per page</option>
+</select>
 <button onclick="resetFilters()">Filters Reset</button>
 </div>
 <div class="export-buttons">
@@ -275,18 +282,19 @@ GitHub
 </footer>
 <script>
 let currentPage = 1;
-const limit = 50;
+let limit = 50;
 let totalProxies = [];
 let cachedProxies = JSON.parse(localStorage.getItem("cachedProxies")) || {};
 
 document.addEventListener("DOMContentLoaded", () => {
+document.getElementById("itemsPerPage").value = limit.toString();
 fetchProxies();
 });
 
 async function fetchProxies() {
 try {
-if (cachedProxies[currentPage]) {
-totalProxies = cachedProxies[currentPage];
+if (cachedProxies[currentPage] && cachedProxies[currentPage].limit === limit) {
+totalProxies = cachedProxies[currentPage].data;
 applyFiltersAndSorting();
 updatePaginationButtons();
 return;
@@ -313,7 +321,7 @@ country: proxy.country || "-",
 
 totalProxies = proxies;
 
-cachedProxies[currentPage] = proxies;
+cachedProxies[currentPage] = { data: proxies, limit };
 localStorage.setItem("cachedProxies", JSON.stringify(cachedProxies));
 
 applyFiltersAndSorting();
@@ -425,6 +433,14 @@ const nextButton = document.getElementById("nextPage");
 const currentPageElement = document.getElementById("currentPage");
 currentPageElement.textContent = `Page ${currentPage}`;
 prevButton.disabled = currentPage === 1;
+}
+
+function changeItemsPerPage() {
+limit = parseInt(document.getElementById("itemsPerPage").value);
+currentPage = 1;
+cachedProxies = {};
+localStorage.removeItem("cachedProxies");
+fetchProxies();
 }
 
 function exportData(format) {
