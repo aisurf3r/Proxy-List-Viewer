@@ -1,6 +1,6 @@
 ![{95FE32A8-EF74-49C1-B0D0-29E66717CE56}](https://github.com/user-attachments/assets/17820b67-2f6a-40bc-95fe-8028019dc7e8)
 
-ProxyList Viewer
+
 ProxyList Viewer is a  self hosted web tool that allows users to view, filter, sort, and export a list of proxies obtained from the GeoNode API.
 
 Key Features
