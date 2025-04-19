@@ -7,21 +7,15 @@ A lightweight web app to explore and manage proxy lists from GeoNode API.
 
 
 Core Features
-⚡ Smart Filtering
+⚡ Smart Filtering By protocol, anonymity, HTTPS, port & country
+
+🔢 Sorting By latency (fastest first) or uptime (most reliable)
 
 
-By protocol, anonymity, HTTPS, port & country
-🔢 Sorting
+💾 Export Options JSON, TXT & CSV formats
 
 
-By latency (fastest first) or uptime (most reliable)
-💾 Export Options
-
-
-JSON, TXT & CSV formats
-📑 Pagination
-
-Handles large proxy lists with ease
+📑 Pagination Handles large proxy lists with ease
 
 
 How It Works
