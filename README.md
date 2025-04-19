@@ -18,20 +18,23 @@ Core Features
 📑 Pagination Handles large proxy lists with ease
 
 
-How It Works
-Fetches fresh proxies from GeoNode API
 
-Filter/Sort using intuitive controls
+HOW IT WORKS?
 
-Export in preferred format
+1-Fetches fresh proxies from GeoNode API
 
-Navigate pages seamlessly
+2-Filter/Sort using intuitive controls
+
+3-Export in preferred format
+
+4- Navigate pages seamlessly
 
 
 # Quick Start
 git clone https://github.com/aisurf3r/Proxy-List-Viewer
 cd Proxy-List-Viewer
 # Just open index.html in browser!
+
 Tech Stack
 🛠️ HTML5/CSS3 | ES6+ | GeoNode API
 
