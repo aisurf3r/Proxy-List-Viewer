@@ -42,3 +42,5 @@ Contributions are welcome! If you find any bugs or have ideas to improve this to
 
 License
 This project is licensed under the MIT License. See the LICENSE file for more details.
+
+Made with ❤️ by @aisurf3r
