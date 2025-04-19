@@ -1,46 +1,45 @@
 ![{95FE32A8-EF74-49C1-B0D0-29E66717CE56}](https://github.com/user-attachments/assets/17820b67-2f6a-40bc-95fe-8028019dc7e8)
 
+ProxyList Viewer 🌐🔍
+Self-Hosted Proxy Management Tool
+A lightweight web app to explore and manage proxy lists from GeoNode API.
 
-ProxyList Viewer is a  self hosted web tool that allows users to view, filter, sort, and export a list of proxies obtained from the GeoNode API.
+Core Features
+⚡ Smart Filtering
 
-Key Features
-Dynamic Filters: Filter proxies by protocol, anonymity level, HTTPS support, port, and country.
-Sorting: Sort proxies by latency (lowest to highest) or uptime (highest to lowest).
-Data Export: Export proxies in JSON, TXT, and CSV formats.
-Pagination: Easily navigate between pages to explore large lists of proxies.
-Modern Interface: Clean and responsive design for an optimal user experience.
+By protocol, anonymity, HTTPS, port & country
+🔢 Sorting
+
+By latency (fastest first) or uptime (most reliable)
+💾 Export Options
+
+JSON, TXT & CSV formats
+📑 Pagination
+
+Handles large proxy lists with ease
 
 How It Works
+Fetches fresh proxies from GeoNode API
 
-Load Proxies:
-The application fetches a list of proxies from the GeoNode API and displays them in an interactive table.
+Filter/Sort using intuitive controls
 
-Filter and Sort:
-Use the available filters to refine the proxy list based on your criteria.
-Enable the latency and uptime switches to sort the results accordingly.
+Export in preferred format
 
-Export Data:
-Select the desired format (JSON, TXT, or CSV) and click the corresponding button to download the data.
+Navigate pages seamlessly
 
-Pagination:
-Navigate between pages using the "Previous" and "Next" buttons.
+bash
+# Quick Start
+git clone https://github.com/aisurf3r/Proxy-List-Viewer
+cd Proxy-List-Viewer
+# Just open index.html in browser!
+Tech Stack
+🛠️ HTML5/CSS3 | ES6+ | GeoNode API
 
-Installation
-1- Clone this repository: git clone https://github.com/aisurf3r/Proxy-List-Viewer
-2- Open the index.html file in your browser to run the application.
+Roadmap 🚧
+• Multiple API endpoints
+• Enhanced filter logic
 
-Technologies Used
-HTML5 & CSS3: Structure and styling of the interface.
-JavaScript (ES6+): Logic for filtering, sorting, and exporting data.
-GeoNode API: Source of proxy data.
+MIT License
+❤️ Crafted by [@aisurf3r]
 
-TODO. + add more proxy endpoints and a selector to choose from.
-      + workarround the filters logic
-
-Contributions
-Contributions are welcome! If you find any bugs or have ideas to improve this tool, feel free to open an issue or submit a pull request.
-
-License
-This project is licensed under the MIT License. See the LICENSE file for more details.
-
-Made with ❤️ by @aisurf3r
+"Proxy management made simple"
