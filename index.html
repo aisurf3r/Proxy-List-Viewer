@@ -1,500 +1,795 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="description" content="View, filter, sort, and export a list of proxies obtained from the GeoNode API">
-<title>ProxyList Viewer</title>
-<style>
-body {
-font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-margin: 0;
-padding: 0;
-background: #121212;
-color: #e0e0e0;
-display: flex;
-flex-direction: column;
-align-items: center;
-min-height: 100vh;
-}
-h1 {
-text-align: center;
-color: #bb86fc;
-margin-top: 20px;
-}
-.filters-container {
-width: 95%;
-max-width: 1200px;
-margin: 20px auto;
-display: grid;
-grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-gap: 15px;
-}
-.filters-container input, .filters-container select {
-width: 100%;
-padding: 10px;
-border: 1px solid #333;
-border-radius: 5px;
-font-size: 14px;
-background-color: #1e1e1e;
-color: #e0e0e0;
-transition: all 0.3s ease;
-}
-.filters-container input:focus, .filters-container select:focus {
-border-color: #bb86fc;
-box-shadow: 0 0 5px rgba(187, 134, 252, 0.5);
-}
-.filters-container label {
-color: #bb86fc;
-font-weight: bold;
-}
-.switch-container {
-display: flex;
-align-items: center;
-gap: 10px;
-}
-.switch {
-position: relative;
-display: inline-block;
-width: 50px;
-height: 24px;
-}
-.switch input {
-opacity: 0;
-width: 0;
-height: 0;
-}
-.slider {
-position: absolute;
-cursor: pointer;
-top: 0;
-left: 0;
-right: 0;
-bottom: 0;
-background-color: #333;
-transition: 0.4s;
-border-radius: 24px;
-}
-.slider:before {
-position: absolute;
-content: "";
-height: 18px;
-width: 18px;
-left: 3px;
-bottom: 3px;
-background-color: white;
-transition: 0.4s;
-border-radius: 50%;
-}
-input:checked + .slider {
-background-color: #bb86fc;
-}
-input:checked + .slider:before {
-transform: translateX(26px);
-}
-table {
-width: 95%;
-max-width: 1200px;
-border-collapse: collapse;
-margin: 20px auto;
-background: #1e1e1e;
-border-radius: 10px;
-overflow: hidden;
-box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
-}
-table th, table td {
-border: 1px solid #333;
-padding: 12px;
-text-align: left;
-}
-table th {
-background: #bb86fc;
-color: #121212;
-font-weight: bold;
-}
-table tr:hover {
-background-color: #2c2c2c;
-transition: background-color 0.3s ease;
-}
-.latency-low {
-color: #4caf50;
-}
-.latency-medium {
-color: #ff9800;
-}
-.latency-high {
-color: #f44336;
-}
-.export-buttons {
-text-align: center;
-margin-bottom: 20px;
-display: flex;
-align-items: center;
-justify-content: center;
-gap: 10px;
-}
-button {
-padding: 10px 20px;
-margin: 5px;
-border: none;
-border-radius: 5px;
-cursor: pointer;
-background-color: #bb86fc;
-color: #121212;
-font-size: 16px;
-transition: all 0.3s ease;
-}
-button:hover {
-background-color: #3700b3;
-transform: scale(1.05);
-}
-select#exportFormatSelector {
-padding: 10px 20px;
-margin: 5px;
-border: none;
-border-radius: 5px;
-cursor: pointer;
-background-color: #bb86fc;
-color: #121212;
-font-size: 16px;
-transition: all 0.3s ease;
-}
-select#exportFormatSelector:hover {
-background-color: #3700b3;
-transform: scale(1.05);
-}
-.pagination {
-margin-top: 20px;
-display: flex;
-gap: 10px;
-align-items: center;
-}
-footer {
-margin-top: auto;
-padding: 20px;
-background: #1e1e1e;
-color: #e0e0e0;
-width: 100%;
-text-align: center;
-font-size: 14px;
-}
-footer a {
-color: #bb86fc;
-text-decoration: none;
-display: flex;
-align-items: center;
-justify-content: center;
-gap: 5px;
-}
-footer a img {
-width: 20px;
-height: 20px;
-}
-@media (max-width: 768px) {
-.filters-container {
-grid-template-columns: 1fr;
-}
-}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Visor moderno de proxies GeoNode - filtros, orden, exportación y responsive">
+    <title>ProxyList Viewer</title>
+    <style>
+        :root {
+            --bg: #0a0a0a;
+            --surface: #161616;
+            --card: #1f1f1f;
+            --accent: #bb86fc;
+            --accent-dark: #3700b3;
+            --text: #f0f0f0;
+            --text-muted: #a0a0a0;
+            --border: #333;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            line-height: 1.5;
+        }
+
+        header {
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            padding: 1rem 0;
+            width: 100%;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+        }
+
+        .header-content {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--accent);
+            letter-spacing: -1px;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        button.refresh-btn {
+            background: var(--surface);
+            color: var(--accent);
+            border: 2px solid var(--accent);
+            padding: 8px 16px;
+            border-radius: 9999px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.3s ease;
+        }
+
+        button.refresh-btn:hover {
+            background: var(--accent);
+            color: #121212;
+            transform: rotate(180deg);
+        }
+
+        .main-container {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 20px;
+            flex: 1;
+            width: 100%;
+        }
+
+        .controls {
+            background: var(--card);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 24px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 16px;
+            align-items: end;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .filter-group label {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--accent);
+            margin-bottom: 4px;
+        }
+
+        input, select {
+            padding: 14px 16px;
+            background: var(--surface);
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            color: var(--text);
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        input:focus, select:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 4px rgba(187, 134, 252, 0.2);
+            outline: none;
+        }
+
+        .switch-group {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .switch-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 62px;
+            height: 32px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: #333;
+            transition: .4s;
+            border-radius: 9999px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 24px;
+            width: 24px;
+            left: 4px;
+            bottom: 4px;
+            background: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background: var(--accent);
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(30px);
+        }
+
+        .table-wrapper {
+            background: var(--card);
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+            margin-bottom: 24px;
+        }
+
+        .table-container {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        table {
+            width: 100%;
+            min-width: 900px;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 16px 14px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+
+        th {
+            background: var(--accent);
+            color: #121212;
+            font-weight: 700;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        tr:hover {
+            background: rgba(187, 134, 252, 0.1);
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        .latency-low { color: #4ade80; font-weight: 600; }
+        .latency-medium { color: #facc15; font-weight: 600; }
+        .latency-high { color: #f87171; font-weight: 600; }
+
+        .copy-btn {
+            background: var(--accent);
+            color: #121212;
+            border: none;
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 10px rgba(187, 134, 252, 0.4);
+        }
+
+        .copy-btn:hover {
+            background: var(--accent-dark);
+            transform: scale(1.1);
+        }
+
+        .export-section {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            align-items: center;
+            justify-content: center;
+            background: var(--card);
+            padding: 20px;
+            border-radius: 16px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+			margin-top: 40px;
+        }
+
+        .export-section select {
+            min-width: 220px;
+            border-radius: 12px;
+        }
+
+        button.export-btn {
+            background: var(--accent);
+            color: #121212;
+            font-weight: 700;
+            padding: 14px 28px;
+            border-radius: 12px;           /* ← Cambiado: ahora cuadrado con bordes redondeados */
+            font-size: 1.05rem;
+            transition: all 0.3s ease;
+            min-width: 160px;
+        }
+
+        button.export-btn:hover {
+            background: var(--accent-dark);
+            transform: translateY(-2px);
+        }
+
+        .pagination {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+            margin-top: 16px;
+            flex-wrap: wrap;
+        }
+
+        .pagination button {
+            background: var(--surface);
+            color: var(--text);
+            border: 2px solid var(--border);
+            padding: 12px 24px;
+            border-radius: 9999px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .pagination button:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        .pagination button:not(:disabled):hover {
+            background: var(--accent);
+            color: #121212;
+        }
+
+        .page-info {
+            font-weight: 600;
+            color: var(--text-muted);
+            min-width: 140px;
+            text-align: center;
+        }
+
+        footer {
+            margin-top: auto;
+            background: var(--surface);
+            padding: 20px;
+            text-align: center;
+            font-size: 0.95rem;
+            color: var(--text-muted);
+            border-top: 1px solid var(--border);
+        }
+
+        footer a {
+            color: var(--accent);
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        footer a img {
+            width: 24px;
+            height: 24px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--accent);
+            font-size: 1.2rem;
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 1.7rem;
+            }
+            
+            .controls {
+                grid-template-columns: 1fr;
+                padding: 16px;
+            }
+            
+            .table-container {
+                border-radius: 12px;
+            }
+            
+            th, td {
+                padding: 14px 10px;
+                font-size: 0.95rem;
+            }
+            
+            .export-section {
+                flex-direction: column;
+            }
+            
+            button.export-btn {
+                min-width: 100%;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .main-container {
+                padding: 12px;
+            }
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--accent);
+            color: #121212;
+            padding: 14px 24px;
+            border-radius: 9999px;
+            box-shadow: 0 10px 30px rgba(187, 134, 252, 0.4);
+            font-weight: 700;
+            z-index: 1000;
+            display: none;
+            align-items: center;
+            gap: 10px;
+        }
+    </style>
 </head>
 <body>
-<h1>ProxyList Viewer</h1>
-<div class="filters-container">
-<select id="protocolFilter" onchange="applyFiltersAndSorting()">
-<option value="">All Protocols</option>
-<option value="http">HTTP</option>
-<option value="https">HTTPS</option>
-<option value="socks4">SOCKS4</option>
-<option value="socks5">SOCKS5</option>
-</select>
-<select id="anonymityFilter" onchange="applyFiltersAndSorting()">
-<option value="">All Anonymity Levels</option>
-<option value="elite">Elite</option>
-<option value="anonymous">Anonymous</option>
-<option value="transparent">Transparent</option>
-</select>
-<select id="httpsFilter" onchange="applyFiltersAndSorting()">
-<option value="">Filter HTTPS</option>
-<option value="Yes">Yes</option>
-<option value="No">No</option>
-</select>
-<div class="switch-container">
-<label for="latencySwitch">Latency Order:</label>
-<label class="switch">
-<input type="checkbox" id="latencySwitch" onchange="applyFiltersAndSorting()">
-<span class="slider"></span>
-</label>
-</div>
-<div class="switch-container">
-<label for="uptimeSwitch">Uptime Order:</label>
-<label class="switch">
-<input type="checkbox" id="uptimeSwitch" onchange="applyFiltersAndSorting()">
-<span class="slider"></span>
-</label>
-</div>
-<input type="text" id="portFilter" placeholder="Search Port..." oninput="applyFiltersAndSorting()">
-<input type="text" id="countryFilter" placeholder="Search Country..." oninput="applyFiltersAndSorting()">
-<select id="itemsPerPage" onchange="changeItemsPerPage()">
-<option value="10">10 per page</option>
-<option value="20">20 per page</option>
-<option value="50" selected>50 per page</option>
-<option value="100">100 per page</option>
-</select>
-<button onclick="resetFilters()">Filters Reset</button>
-</div>
-<div class="export-buttons">
-<select id="exportFormatSelector">
-<option value="full">Protocol:IP:Port</option>
-<option value="simple">IP:Port</option>
-</select>
-<button onclick="exportData('json')">Export JSON</button>
-<button onclick="exportData('txt')">Export TXT</button>
-<button onclick="exportData('csv')">Export CSV</button>
-</div>
-<table id="proxyTable">
-<thead>
-<tr>
-<th>Protocol</th>
-<th>IP Address</th>
-<th>Port</th>
-<th>Anonymity</th>
-<th>Https</th>
-<th>Latency (ms)</th>
-<th>Uptime (%)</th>
-<th>Country</th>
-</tr>
-</thead>
-<tbody>
-<!-- Proxy data will load here -->
-</tbody>
-</table>
-<div class="pagination">
-<button id="prevPage" onclick="changePage(-1)" disabled>< Back</button>
-<span id="currentPage">Page 1</span>
-<button id="nextPage" onclick="changePage(1)">Next ></button>
-</div>
-<footer>
-&copy; 2025 Aisurf3r. All rights reserved.
-<a href="https://github.com/aisurf3r/Proxy-List-Viewer" target="_blank">
-<img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/github/github-original.svg" alt="GitHub Logo">
-GitHub
-</a>
-</footer>
-<script>
-let currentPage = 1;
-let limit = 50;
-let totalProxies = [];
-let cachedProxies = JSON.parse(localStorage.getItem("cachedProxies")) || {};
+    <header>
+        <div class="header-content">
+            <h1>ProxyList Viewer</h1>
+            
+            <div class="header-actions">
+                <button onclick="refreshProxies()" class="refresh-btn">
+                    <span>🔄</span>
+                    <span>Actualizar</span>
+                </button>
+                <a href="https://github.com/aisurf3r/Proxy-List-Viewer" target="_blank" style="color:var(--accent); text-decoration:none; display:flex; align-items:center; gap:8px;">
+                    <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/github/github-original.svg" alt="GitHub" width="28" height="28">
+                    GitHub
+                </a>
+            </div>
+        </div>
+    </header>
 
-document.addEventListener("DOMContentLoaded", () => {
-document.getElementById("itemsPerPage").value = limit.toString();
-fetchProxies();
-});
+    <div class="main-container">
+        <!-- CONTROLES -->
+        <div class="controls">
+            <div class="filter-group">
+                <label>Protocolo</label>
+                <select id="protocolFilter" onchange="applyFiltersAndSorting()">
+                    <option value="">Todos los protocolos</option>
+                    <option value="http">HTTP</option>
+                    <option value="https">HTTPS</option>
+                    <option value="socks4">SOCKS4</option>
+                    <option value="socks5">SOCKS5</option>
+                </select>
+            </div>
 
-async function fetchProxies() {
-try {
-if (cachedProxies[currentPage] && cachedProxies[currentPage].limit === limit) {
-totalProxies = cachedProxies[currentPage].data;
-applyFiltersAndSorting();
-updatePaginationButtons();
-return;
-}
+            <div class="filter-group">
+                <label>Anonimato</label>
+                <select id="anonymityFilter" onchange="applyFiltersAndSorting()">
+                    <option value="">Todos los niveles</option>
+                    <option value="elite">Elite</option>
+                    <option value="anonymous">Anonymous</option>
+                    <option value="transparent">Transparent</option>
+                </select>
+            </div>
 
-const response = await fetch(
-`https://proxylist.geonode.com/api/proxy-list?limit=${limit}&page=${currentPage}&sort_by=lastChecked&sort_type=desc`
-);
+            <div class="filter-group">
+                <label>HTTPS</label>
+                <select id="httpsFilter" onchange="applyFiltersAndSorting()">
+                    <option value="">Cualquiera</option>
+                    <option value="Yes">Solo HTTPS</option>
+                    <option value="No">Solo HTTP</option>
+                </select>
+            </div>
 
-if (!response.ok) throw new Error("Error fetching proxies.");
+            <div class="filter-group">
+                <label>País</label>
+                <input type="text" id="countryFilter" placeholder="Ej: Spain, US..." oninput="applyFiltersAndSorting()">
+            </div>
 
-const { data } = await response.json();
+            <div class="filter-group">
+                <label>Puerto</label>
+                <input type="text" id="portFilter" placeholder="Ej: 8080" oninput="applyFiltersAndSorting()">
+            </div>
 
-const proxies = data.map((proxy) => ({
-protocol: proxy.protocols.join(", "),
-ip: proxy.ip,
-port: proxy.port,
-anonymity: proxy.anonymityLevel || "-",
-https: proxy.isHttps ? "Yes" : "No",
-latency: parseInt(proxy.responseTime) || 0,
-uptime: parseFloat(proxy.upTime).toFixed(2) || "0.00",
-country: proxy.country || "-",
-}));
+            <div class="switch-group">
+                <div class="switch-container">
+                    <label for="latencySwitch" style="font-weight:600;">Ordenar por Latencia</label>
+                    <label class="switch">
+                        <input type="checkbox" id="latencySwitch" onchange="applyFiltersAndSorting()">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                <div class="switch-container">
+                    <label for="uptimeSwitch" style="font-weight:600;">Ordenar por Uptime</label>
+                    <label class="switch">
+                        <input type="checkbox" id="uptimeSwitch" onchange="applyFiltersAndSorting()">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+            </div>
 
-totalProxies = proxies;
+            <div class="filter-group" style="grid-column: span 1;">
+                <label>Por página</label>
+                <select id="itemsPerPage" onchange="changeItemsPerPage()">
+                    <option value="10">10</option>
+                    <option value="20">20</option>
+                    <option value="50" selected>50</option>
+                    <option value="100">100</option>
+                </select>
+            </div>
 
-cachedProxies[currentPage] = { data: proxies, limit };
-localStorage.setItem("cachedProxies", JSON.stringify(cachedProxies));
+            <button onclick="resetFilters()" style="height:52px; margin-top:auto; background:var(--accent); color:#121212; font-weight:700; border-radius:12px; border:none; cursor:pointer;">
+                🔄 Reiniciar filtros
+            </button>
+        </div>
 
-applyFiltersAndSorting();
-updatePaginationButtons();
-} catch (error) {
-console.error(error);
-alert("Error loading proxies. Please try again later.");
-}
-}
+        <!-- TABLA -->
+        <div class="table-wrapper">
+            <div class="table-container">
+                <table id="proxyTable">
+                    <thead>
+                        <tr>
+                            <th>Protocolo</th>
+                            <th>IP</th>
+                            <th>Puerto</th>
+                            <th>Anonimato</th>
+                            <th>HTTPS</th>
+                            <th>Latencia</th>
+                            <th>Uptime</th>
+                            <th>País</th>
+                            <th style="width:60px; text-align:center;">Copiar</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody">
+                        <!-- Se llena con JS -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
 
-function populateTable(proxies) {
-const tbody = document.querySelector("#proxyTable tbody");
-tbody.innerHTML = "";
+        <!-- PAGINACIÓN -->
+        <div class="pagination">
+            <button id="prevPage" onclick="changePage(-1)" disabled>← Anterior</button>
+            <div class="page-info" id="currentPage">Página 1</div>
+            <button id="nextPage" onclick="changePage(1)">Siguiente →</button>
+        </div>
 
-proxies.forEach((proxy) => {
-const row = document.createElement("tr");
+        <!-- EXPORTACIÓN -->
+        <div class="export-section">
+            <select id="exportFormatSelector">
+                <option value="full">Protocolo://IP:Port</option>
+                <option value="simple">IP:Port</option>
+            </select>
+            <button onclick="exportData('txt')" class="export-btn">📄 Exportar TXT</button>
+            <button onclick="exportData('json')" class="export-btn">📦 Exportar JSON</button>
+            <button onclick="exportData('csv')" class="export-btn">📊 Exportar CSV</button>
+        </div>
+    </div>
 
-let latencyClass = "";
-if (proxy.latency <= 200) {
-latencyClass = "latency-low";
-} else if (proxy.latency > 200 && proxy.latency <= 600) {
-latencyClass = "latency-medium";
-} else {
-latencyClass = "latency-high";
-}
+    <!-- TOAST -->
+    <div id="toast" class="toast">✅ Copiado al portapapeles</div>
 
-row.innerHTML = `
-<td>${proxy.protocol}</td>
-<td>${proxy.ip}</td>
-<td>${proxy.port}</td>
-<td>${proxy.anonymity}</td>
-<td>${proxy.https}</td>
-<td class="${latencyClass}">${proxy.latency} ms</td>
-<td>${proxy.uptime}%</td>
-<td>${proxy.country}</td>
-`;
+    <footer>
+        &copy; 2026 Aisurf3r • ProxyList Viewer<br>
+        Totalmente responsive • Creado con ❤️ para la comunidad
+    </footer>
 
-tbody.appendChild(row);
-});
-}
+    <script>
+        // ====================== VARIABLES GLOBALES ======================
+        let currentPage = 1;
+        let limit = 50;
+        let totalProxies = [];
+        let cachedProxies = JSON.parse(localStorage.getItem("cachedProxies")) || {};
+        let isLastPage = false;
 
-function applyFiltersAndSorting() {
-const protocolFilter = document.getElementById("protocolFilter").value.toLowerCase();
-const anonymityFilter = document.getElementById("anonymityFilter").value;
-const httpsFilter = document.getElementById("httpsFilter").value;
-const portFilter = document.getElementById("portFilter").value.trim();
-const countryFilter = document.getElementById("countryFilter").value.toLowerCase();
+        // ====================== CARGAR AL INICIO ======================
+        document.addEventListener("DOMContentLoaded", () => {
+            document.getElementById("itemsPerPage").value = limit;
+            fetchProxies();
+        });
 
-// Apply filters
-const filteredData = totalProxies.filter((proxy) => {
-return (
-(protocolFilter === "" || proxy.protocol.toLowerCase().includes(protocolFilter)) &&
-(anonymityFilter === "" || proxy.anonymity.toLowerCase() === anonymityFilter) &&
-(httpsFilter === "" || proxy.https === httpsFilter) &&
-(portFilter === "" || proxy.port.toString().includes(portFilter)) &&
-(countryFilter === "" || proxy.country.toLowerCase().includes(countryFilter))
-);
-});
+        // ====================== OBTENER PROXIES ======================
+        async function fetchProxies() {
+            const tbody = document.getElementById("tableBody");
+            tbody.innerHTML = `<tr><td colspan="9" class="loading">🔄 Cargando proxies de GeoNode...</td></tr>`;
 
-// Apply sorting
-applySorting(filteredData);
-}
+            try {
+                if (cachedProxies[currentPage] && cachedProxies[currentPage].limit === limit) {
+                    totalProxies = cachedProxies[currentPage].data;
+                    isLastPage = cachedProxies[currentPage].isLastPage || false;
+                    applyFiltersAndSorting();
+                    updatePagination();
+                    return;
+                }
 
-function applySorting(filteredData) {
-const latencySwitch = document.getElementById("latencySwitch").checked;
-const uptimeSwitch = document.getElementById("uptimeSwitch").checked;
+                const response = await fetch(
+                    `https://proxylist.geonode.com/api/proxy-list?limit=${limit}&page=${currentPage}&sort_by=lastChecked&sort_type=desc`
+                );
 
-let sortedData = [...filteredData];
+                if (!response.ok) throw new Error("Error en la API");
 
-if (latencySwitch && uptimeSwitch) {
-sortedData.sort((a, b) => {
-if (a.latency === b.latency) {
-return parseFloat(b.uptime) - parseFloat(a.uptime);
-}
-return a.latency - b.latency;
-});
-} else if (latencySwitch) {
-sortedData.sort((a, b) => a.latency - b.latency);
-} else if (uptimeSwitch) {
-sortedData.sort((a, b) => parseFloat(b.uptime) - parseFloat(a.uptime));
-}
+                const { data } = await response.json();
 
-populateTable(sortedData);
-}
+                const proxies = data.map(p => ({
+                    protocol: p.protocols.join(", "),
+                    firstProtocol: p.protocols[0] || "http",
+                    ip: p.ip,
+                    port: p.port,
+                    anonymity: p.anonymityLevel || "—",
+                    https: p.isHttps ? "Yes" : "No",
+                    latency: parseInt(p.responseTime) || 0,
+                    uptime: parseFloat(p.upTime).toFixed(2) || "0.00",
+                    country: p.country || "—"
+                }));
 
-function resetFilters() {
-document.getElementById("protocolFilter").value = "";
-document.getElementById("anonymityFilter").value = "";
-document.getElementById("httpsFilter").value = "";
-document.getElementById("portFilter").value = "";
-document.getElementById("countryFilter").value = "";
-document.getElementById("latencySwitch").checked = false;
-document.getElementById("uptimeSwitch").checked = false;
+                totalProxies = proxies;
+                isLastPage = data.length < limit;
 
-applyFiltersAndSorting();
-}
+                cachedProxies[currentPage] = { 
+                    data: proxies, 
+                    limit: limit,
+                    isLastPage: isLastPage
+                };
+                localStorage.setItem("cachedProxies", JSON.stringify(cachedProxies));
 
-function changePage(direction) {
-currentPage += direction;
-if (currentPage < 1) {
-currentPage = 1;
-}
-fetchProxies();
-}
+                applyFiltersAndSorting();
+                updatePagination();
 
-function updatePaginationButtons() {
-const prevButton = document.getElementById("prevPage");
-const nextButton = document.getElementById("nextPage");
-const currentPageElement = document.getElementById("currentPage");
-currentPageElement.textContent = `Page ${currentPage}`;
-prevButton.disabled = currentPage === 1;
-}
+            } catch (error) {
+                console.error(error);
+                tbody.innerHTML = `<tr><td colspan="9" style="text-align:center; color:#f87171; padding:60px;">⚠️ Error al cargar proxies.<br>La API de GeoNode podría estar temporalmente caída.</td></tr>`;
+            }
+        }
 
-function changeItemsPerPage() {
-limit = parseInt(document.getElementById("itemsPerPage").value);
-currentPage = 1;
-cachedProxies = {};
-localStorage.removeItem("cachedProxies");
-fetchProxies();
-}
+        // ====================== REFRESCAR ======================
+        function refreshProxies() {
+            cachedProxies = {};
+            localStorage.removeItem("cachedProxies");
+            currentPage = 1;
+            fetchProxies();
+        }
 
-function exportData(format) {
-const data = totalProxies;
-if (!data || data.length === 0) {
-alert("No data to export.");
-return;
-}
+        // ====================== POBLAR TABLA ======================
+        function populateTable(filtered) {
+            const tbody = document.getElementById("tableBody");
+            tbody.innerHTML = "";
 
-const exportFormat = document.getElementById("exportFormatSelector").value;
+            if (filtered.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="9" style="text-align:center; padding:60px; color:var(--text-muted);">No se encontraron proxies con los filtros aplicados.</td></tr>`;
+                return;
+            }
 
-if (format === "json") {
-try {
-JSON.stringify(data);
-const jsonData = JSON.stringify(data, null, 2);
-downloadFile(jsonData, "proxies.json", "application/json");
-} catch (error) {
-alert("Invalid JSON data.");
-}
-} else if (format === "txt") {
-let txtData = "";
-if (exportFormat === "full") {
-txtData = data
-.map((proxy) => `${proxy.protocol}://${proxy.ip}:${proxy.port}`)
-.join("\n");
-} else {
-txtData = data
-.map((proxy) => `${proxy.ip}:${proxy.port}`)
-.join("\n");
-}
-downloadFile(txtData, "proxies.txt", "text/plain");
-} else if (format === "csv") {
-try {
-const csvHeaders = Object.keys(data[0]).join(",");
-const csvRows = data.map((proxy) =>
-Object.values(proxy).map((val) => `"${val}"`).join(",")
-);
-const csvData = [csvHeaders, ...csvRows].join("\n");
-downloadFile(csvData, "proxies.csv", "text/csv");
-} catch (error) {
-alert("Invalid CSV data.");
-}
-}
-}
+            filtered.forEach(proxy => {
+                const latencyClass = proxy.latency <= 200 ? "latency-low" :
+                                   proxy.latency <= 600 ? "latency-medium" : "latency-high";
 
-function downloadFile(content, fileName, mimeType) {
-const blob = new Blob([content], { type: mimeType });
-const url = URL.createObjectURL(blob);
-const a = document.createElement("a");
-a.href = url;
-a.download = fileName;
-a.click();
-URL.revokeObjectURL(url);
-}
-</script>
+                const row = document.createElement("tr");
+                row.innerHTML = `
+                    <td><strong>${proxy.protocol}</strong></td>
+                    <td style="font-family: monospace;">${proxy.ip}</td>
+                    <td style="font-family: monospace; font-weight:600;">${proxy.port}</td>
+                    <td>${proxy.anonymity}</td>
+                    <td>${proxy.https}</td>
+                    <td class="${latencyClass}">${proxy.latency} ms</td>
+                    <td>${proxy.uptime}%</td>
+                    <td>${proxy.country}</td>
+                    <td style="text-align:center;">
+                        <button class="copy-btn" onclick="copyProxy('${proxy.firstProtocol}', '${proxy.ip}', ${proxy.port})" title="Copiar proxy">📋</button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        // ====================== COPIAR PROXY ======================
+        window.copyProxy = function(protocol, ip, port) {
+            const text = `${protocol}://${ip}:${port}`;
+            navigator.clipboard.writeText(text).then(() => {
+                const toast = document.getElementById("toast");
+                toast.style.display = "flex";
+                setTimeout(() => {
+                    toast.style.display = "none";
+                }, 2200);
+            });
+        };
+
+        // ====================== FILTROS + ORDEN ======================
+        function applyFiltersAndSorting() {
+            const protocolFilter = document.getElementById("protocolFilter").value.toLowerCase();
+            const anonymityFilter = document.getElementById("anonymityFilter").value;
+            const httpsFilter = document.getElementById("httpsFilter").value;
+            const portFilter = document.getElementById("portFilter").value.trim();
+            const countryFilter = document.getElementById("countryFilter").value.toLowerCase().trim();
+
+            let filtered = totalProxies.filter(proxy => {
+                return (
+                    (!protocolFilter || proxy.protocol.toLowerCase().includes(protocolFilter)) &&
+                    (!anonymityFilter || proxy.anonymity.toLowerCase() === anonymityFilter) &&
+                    (!httpsFilter || proxy.https === httpsFilter) &&
+                    (!portFilter || proxy.port.toString().includes(portFilter)) &&
+                    (!countryFilter || proxy.country.toLowerCase().includes(countryFilter))
+                );
+            });
+
+            const sortLatency = document.getElementById("latencySwitch").checked;
+            const sortUptime = document.getElementById("uptimeSwitch").checked;
+
+            if (sortLatency && sortUptime) {
+                filtered.sort((a, b) => {
+                    if (a.latency === b.latency) return parseFloat(b.uptime) - parseFloat(a.uptime);
+                    return a.latency - b.latency;
+                });
+            } else if (sortLatency) {
+                filtered.sort((a, b) => a.latency - b.latency);
+            } else if (sortUptime) {
+                filtered.sort((a, b) => parseFloat(b.uptime) - parseFloat(a.uptime));
+            }
+
+            populateTable(filtered);
+        }
+
+        // ====================== REINICIAR FILTROS ======================
+        function resetFilters() {
+            document.getElementById("protocolFilter").value = "";
+            document.getElementById("anonymityFilter").value = "";
+            document.getElementById("httpsFilter").value = "";
+            document.getElementById("portFilter").value = "";
+            document.getElementById("countryFilter").value = "";
+            document.getElementById("latencySwitch").checked = false;
+            document.getElementById("uptimeSwitch").checked = false;
+            applyFiltersAndSorting();
+        }
+
+        // ====================== PAGINACIÓN ======================
+        function changePage(direction) {
+            currentPage += direction;
+            if (currentPage < 1) currentPage = 1;
+            fetchProxies();
+        }
+
+        function updatePagination() {
+            document.getElementById("currentPage").textContent = `Página ${currentPage}`;
+            
+            const prevBtn = document.getElementById("prevPage");
+            const nextBtn = document.getElementById("nextPage");
+            
+            prevBtn.disabled = currentPage === 1;
+            nextBtn.disabled = isLastPage;
+        }
+
+        // ====================== CAMBIAR CANTIDAD POR PÁGINA ======================
+        function changeItemsPerPage() {
+            limit = parseInt(document.getElementById("itemsPerPage").value);
+            currentPage = 1;
+            cachedProxies = {};
+            localStorage.removeItem("cachedProxies");
+            fetchProxies();
+        }
+
+        // ====================== EXPORTAR ======================
+        function exportData(format) {
+            if (!totalProxies || totalProxies.length === 0) {
+                alert("No hay datos para exportar");
+                return;
+            }
+
+            const exportType = document.getElementById("exportFormatSelector").value;
+
+            if (format === "json") {
+                const jsonData = JSON.stringify(totalProxies, null, 2);
+                downloadFile(jsonData, "proxies.json", "application/json");
+            } 
+            else if (format === "txt") {
+                let txtData = totalProxies.map(p => 
+                    exportType === "full" 
+                        ? `${p.firstProtocol}://${p.ip}:${p.port}` 
+                        : `${p.ip}:${p.port}`
+                ).join("\n");
+                downloadFile(txtData, "proxies.txt", "text/plain");
+            } 
+            else if (format === "csv") {
+                const headers = Object.keys(totalProxies[0]).join(",");
+                const rows = totalProxies.map(p => 
+                    Object.values(p).map(val => `"${val}"`).join(",")
+                );
+                const csvData = [headers, ...rows].join("\n");
+                downloadFile(csvData, "proxies.csv", "text/csv");
+            }
+        }
+
+        function downloadFile(content, filename, mime) {
+            const blob = new Blob([content], { type: mime });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = filename;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+    </script>
 </body>
 </html>
