@@ -1,4 +1,7 @@
-![{95FE32A8-EF74-49C1-B0D0-29E66717CE56}](https://github.com/user-attachments/assets/17820b67-2f6a-40bc-95fe-8028019dc7e8)
+<img width="1277" height="955" alt="{48D3F47D-8D3D-4D0E-8321-35126907300E}" src="https://github.com/user-attachments/assets/47fb5fa1-32cf-4ba4-b7ce-143e48c30d97" />
+<img width="1288" height="936" alt="{957C4EC7-2E7C-4581-ABD6-DE9EC6C5B613}" src="https://github.com/user-attachments/assets/f82b0e51-6404-442c-8039-e7a0fd5f67e0" />
+
+
  
 ProxyList Viewer 🌐🔍
 
